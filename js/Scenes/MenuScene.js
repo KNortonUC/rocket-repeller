@@ -7,7 +7,7 @@ class MenuScene extends Phaser.Scene
 	
 	preload()
 	{
-		this.load.image("background-bluesky", "assets/backgrounds/bg_bluesky.png");
+		this.load.image("background-menu", "assets/backgrounds/bg_level.png");
 		this.load.image("logo", "assets/logo_01.png");
 	}
 	
@@ -17,8 +17,9 @@ class MenuScene extends Phaser.Scene
 	{
 		this.menuHidders = this.physics.add.group(); // This Group is things that need to be hidden in the options menu
 		
-		var bg = this.add.image(0, 0, 'background-bluesky');
-		bg.setDisplaySize(config.width * 2, config.height * 2);
+		var bg = this.add.image(config.width / 2, config.height / 2, 'background-menu');
+
+		//bg.setDisplaySize(config.width * 2, config.height * 2);
 		
 		this.logo = this.add.image(config.width / 2, config.height / 2 / 2, 'logo');
 		this.logo.setScale(0);
