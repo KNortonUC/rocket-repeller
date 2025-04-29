@@ -9,16 +9,21 @@ class GameScene extends Phaser.Scene
 	preload()
 	{
 		this.load.image("background-scene", "assets/backgrounds/bg_level.png");
+		this.load.spritesheet("explosion", "assets/explosion.png", { frameWidth: 16, frameHeight: 16 });
+
+		this.load.image("player-veh", "assets/player_veh.png");
 		
-		this.load.image("missle-normal", "assets/none.png");
+		this.load.image("missle-normal", "assets/missle_normal.png");
 		this.load.image("missle-nuke", "assets/none.png");
-		this.load.image("missle-counter", "assets/none.png");
+		this.load.image("missle-counter", "assets/missle_nuke.png");
 
 	}
 	
 	
 	create()
 	{
+		var gameStarted = false;
+		
 		// Background
 		var gbg = this.add.image(config.width / 2, config.height / 2, 'background-scene');
 		
@@ -27,13 +32,37 @@ class GameScene extends Phaser.Scene
 		this.scoreLabel = this.add.bitmapText(10,5, "pixelFont", "SCORE:", 32);
 		this.scoreNumberLabel = this.add.bitmapText(95,5, "pixelFont", this.score, 32);
 		
+		this.worldHealth = this.getDifficultyLevel().worldHealth;
+		this.healthLabel = this.add.bitmapText(10,25, "pixelFont", "Health:", 32);
+		this.healthNumberLabel = this.add.bitmapText(95,25, "pixelFont", this.worldHealth, 32);		
 		
+		// Create Physics groups
 		this.incoming = this.physics.add.group();
 		this.specials = this.physics.add.group();
-		this.counterShots = this.physics.add.group();
+		this.projectiles = this.physics.add.group();
+		
+		this.physics.add.overlap(this.projectiles, this.incoming, this.destoryIncoming, null, this);
+		
+		// Animations
+		this.anims.create(
+		{
+			key: "explode",
+			frames: this.anims.generateFrameNumbers("explosion"),
+			frameRate: 20,
+			repeat: 0,
+			hideOnComplete: true
+		});
+		
+		// To be moved to start game function
 		
 		this.createTimer();
 		//this.createIncomingMissileFromTop("type", "missle-normal");
+		
+		this.cursorKeys = this.input.keyboard.createCursorKeys();
+		this.spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+		
+		this.player = this.physics.add.sprite(config.width/2 - 50, config.height - 80, "player-veh");
+		this.player.setCollideWorldBounds(true);
 	}
 	
 	createTimer()
@@ -49,14 +78,44 @@ class GameScene extends Phaser.Scene
 	
 	update()
 	{
-		this.incoming.children.iterate((missle) => {
-		if (!missle) return; 
-			this.moveMissile(missle);
-			
-		
+		// Update movement for all missiles
+		this.incoming.children.iterate((missile) => {
+		if (!missile) return; 
+			this.moveMissile(missile);
 		});
-			
+		
+		this.player.setVelocity(0);
+
+		if(this.cursorKeys.left.isDown){
+			this.player.setVelocityX(-250);
+			this.player.flipX = false; 
+		}else if(this.cursorKeys.right.isDown){
+			this.player.setVelocityX(250);
+			this.player.flipX = true;  
+		}
+		
+		if (Phaser.Input.Keyboard.JustDown(this.spacebar)){
+			this.playerShoot();
+		}
+
 	}	
+	
+	playerShoot()
+	{
+		var x = this.player.x;
+		var y = this.player.y - 16;
+
+
+		var missile = this.physics.add.sprite(x, y, "missle-counter");
+		missile.flipY = true;
+
+		this.physics.world.enableBody(missile);
+
+
+		this.projectiles.add(missile);	
+		
+		missile.setVelocityY(-350);
+	}
 	
 	// Creates a Missle at the top of the screen randomly in the width of a given type with a texture //
 	createIncomingMissileFromTop(type, texture)
@@ -78,11 +137,41 @@ class GameScene extends Phaser.Scene
 		this.incoming.add(missile);
 	}
 	
+	createExplosion(x, y)
+	{
+		var exp = this.add.sprite(x, y, "explosion");
+		exp.setScale(3);
+		exp.play("explode");
+	}
+	
 	moveMissile(missle){
 		missle.y += missle.speed;
 		if(missle.y > config.height - 60){
+			this.createExplosion(missle.x, missle.y);
 			missle.destroy();
-			
+			this.worldDamage(50);
+		}
+	}
+
+	
+	destoryIncoming(projectile, incoming)
+	{
+		this.createExplosion(incoming.x, incoming.y);
+		projectile.destroy();
+		incoming.destroy();
+
+		
+		this.popScore(50);
+	}
+	
+	
+	worldDamage(amount)
+	{
+		this.worldHealth -= amount;
+		this.healthNumberLabel.text = this.worldHealth, 6;
+		if (this.worldHealth <= 0) 
+		{
+			// End Game Logic Start
 		}
 	}
 	

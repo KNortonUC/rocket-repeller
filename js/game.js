@@ -3,6 +3,7 @@ var difficultyEasy =
 	maxIncoming: 4, // Max incoming objects (missiles)
 	minSpeed: 2, // Min speed of missiles (Used as a rand range)
 	maxSpeed: 4, // Max speed of missiles (Used as a rand range)
+	playerSpeed: 200,
 	specialChance: 0.6,
 	spawnSpeed: 2000, // Mill seconds (this is static for the whole thing currently)
 	worldHealth: 300
@@ -13,6 +14,7 @@ var difficultyMed =
 	maxIncoming: 6, 
 	minSpeed: 5,
 	maxSpeed: 9,
+	playerSpeed: 200,	
 	specialChance: 0.4,
 	spawnSpeed: 2000,
 	worldHealth: 200
