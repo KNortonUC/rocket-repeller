@@ -12,8 +12,8 @@ var difficultyEasy =
 var difficultyMed =
 {
 	maxIncoming: 6, 
-	minSpeed: 5,
-	maxSpeed: 9,
+	minSpeed: 3,
+	maxSpeed: 6,
 	playerSpeed: 200,	
 	specialChance: 0.4,
 	spawnSpeed: 2000,

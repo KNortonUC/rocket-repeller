@@ -46,8 +46,8 @@ class GameScene extends Phaser.Scene
 		this.physics.add.overlap(this.projectiles, this.incoming, this.destoryIncoming, null, this);
 		
 		// Debug Physics
-		this.physics.world.createDebugGraphic();
-		this.physics.world.drawDebug = true;
+		//this.physics.world.createDebugGraphic();
+	//	this.physics.world.drawDebug = true;
 		
 		// Animations
 		this.anims.create(
