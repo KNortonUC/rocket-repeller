@@ -6,7 +6,7 @@ var config =
 	backgroundColor: 0x000000,
 	
 	// Scenes Preload
-	scene: MenuScene,
+	scene: [MenuScene, GameScene],
 	
 	// Physics 
 	physics: 

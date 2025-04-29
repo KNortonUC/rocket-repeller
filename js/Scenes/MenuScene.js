@@ -3,12 +3,17 @@ class MenuScene extends Phaser.Scene
 	
 	constructor(){
 		super("bootGame");
+		console.log("MenuScene loaded");
 	}
 	
 	preload()
 	{
 		this.load.image("background-menu", "assets/backgrounds/bg_level.png");
 		this.load.image("logo", "assets/logo_01.png");
+		
+		// Fonts
+		this.load.bitmapFont("pixelFont", "assets/font/font.png", "assets/font/font.xml");
+		
 	}
 	
 
@@ -57,7 +62,8 @@ class MenuScene extends Phaser.Scene
 		.setOrigin(0.5)
 		.setInteractive({ useHandCursor: true }) // Makes the hand cursor
 		.on('pointerdown', () => {
-		console.log('Play clicked!');
+			this.scene.start("GameScene");
+			console.log('Play clicked!');
 		// Start game scene here
 		})
 		.on('pointerover', () => this.playButton.setStyle({ backgroundColor: '#333333' }))
@@ -84,3 +90,4 @@ class MenuScene extends Phaser.Scene
 	
 	
 }
+
