@@ -22,7 +22,8 @@ class GameScene extends Phaser.Scene
 	
 	create()
 	{
-		var gameStarted = false;
+		this.gameStarted = false;
+		this.canFire = true;
 		
 		// Background
 		var gbg = this.add.image(config.width / 2, config.height / 2, 'background-scene');
@@ -42,6 +43,10 @@ class GameScene extends Phaser.Scene
 		this.projectiles = this.physics.add.group();
 		
 		this.physics.add.overlap(this.projectiles, this.incoming, this.destoryIncoming, null, this);
+		
+		// Debug Physics
+		this.physics.world.createDebugGraphic();
+		this.physics.world.drawDebug = true;
 		
 		// Animations
 		this.anims.create(
@@ -63,6 +68,8 @@ class GameScene extends Phaser.Scene
 		
 		this.player = this.physics.add.sprite(config.width/2 - 50, config.height - 80, "player-veh");
 		this.player.setCollideWorldBounds(true);
+		
+		this.popScore(0); // Fixes the formating of the text at start
 	}
 	
 	createTimer()
@@ -84,6 +91,15 @@ class GameScene extends Phaser.Scene
 			this.moveMissile(missile);
 		});
 		
+		// Destroys projectiles past limit
+		this.projectiles.children.iterate((missile) => {
+		if (!missile) return; 
+			if(missile.y < -config.height)
+			{
+				missile.destroy();
+			}
+		});		
+		
 		this.player.setVelocity(0);
 
 		if(this.cursorKeys.left.isDown){
@@ -102,11 +118,15 @@ class GameScene extends Phaser.Scene
 	
 	playerShoot()
 	{
+		if (this.canFire == false)
+			return;
+		
 		var x = this.player.x;
 		var y = this.player.y - 16;
 
 
 		var missile = this.physics.add.sprite(x, y, "missle-counter");
+		missile.body.setSize(25, 30);
 		missile.flipY = true;
 
 		this.physics.world.enableBody(missile);
@@ -115,6 +135,21 @@ class GameScene extends Phaser.Scene
 		this.projectiles.add(missile);	
 		
 		missile.setVelocityY(-350);
+		
+		this.canFire = false;
+		
+		// Shoot cooldown
+		this.time.addEvent({
+			delay: 800,
+			callback: this.resetShootability,
+			callbackScope: this,
+			loop: false
+		});
+	}
+	
+	resetShootability()
+	{
+		this.canFire = true;
 	}
 	
 	// Creates a Missle at the top of the screen randomly in the width of a given type with a texture //
@@ -123,11 +158,11 @@ class GameScene extends Phaser.Scene
 		if (this.incoming.children.entries.length >= this.getDifficultyLevel().maxIncoming) 
 			return;
 	
-		var missile = this.add.sprite(config.width/2 - 50, config.height/2, texture);
-		
+		var missile = this.physics.add.sprite(config.width/2 - 50, config.height/2, texture);
+		missile.body.setSize(15, 30);
 		// Set Position
 		missile.y = 0;
-		var randomX = Phaser.Math.Between(15, config.width - 15);
+		var randomX = Phaser.Math.Between(25, config.width - 25);
 		missile.x = randomX;
 		
 		
