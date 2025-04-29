@@ -23,6 +23,7 @@ class GameScene extends Phaser.Scene
 	create()
 	{
 		this.gameStarted = false;
+		this.gameEnded = false;
 		this.canFire = true;
 		
 		// Background
@@ -58,16 +59,9 @@ class GameScene extends Phaser.Scene
 			hideOnComplete: true
 		});
 		
-		// To be moved to start game function
+		this.startLabel = this.add.bitmapText(config.width / 2, config.height / 2, "pixelFont", "BEGIN", 80);
+		this.startLabel.setOrigin(0.5,0.5);
 		
-		this.createTimer();
-		//this.createIncomingMissileFromTop("type", "missle-normal");
-		
-		this.cursorKeys = this.input.keyboard.createCursorKeys();
-		this.spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
-		
-		this.player = this.physics.add.sprite(config.width/2 - 50, config.height - 80, "player-veh");
-		this.player.setCollideWorldBounds(true);
 		
 		this.popScore(0); // Fixes the formating of the text at start
 	}
@@ -85,6 +79,14 @@ class GameScene extends Phaser.Scene
 	
 	update()
 	{
+		if (this.startLabel && !this.gameStarted && !this.gameEnded){
+			this.startLabel.setScale(this.startLabel.scale - 0.01);
+			if(this.startLabel.scale < 0.2) {
+				this.startLabel.destroy();
+				this.startGame();
+			}
+		}
+		
 		// Update movement for all missiles
 		this.incoming.children.iterate((missile) => {
 		if (!missile) return; 
@@ -100,21 +102,63 @@ class GameScene extends Phaser.Scene
 			}
 		});		
 		
-		this.player.setVelocity(0);
 
-		if(this.cursorKeys.left.isDown){
-			this.player.setVelocityX(-250);
-			this.player.flipX = false; 
-		}else if(this.cursorKeys.right.isDown){
-			this.player.setVelocityX(250);
-			this.player.flipX = true;  
+			if (this.gameStarted) {
+				this.player.setVelocity(0);
+				
+				if(this.cursorKeys.left.isDown){
+					this.player.setVelocityX(-250);
+					this.player.flipX = false; 
+				}else if(this.cursorKeys.right.isDown){
+					this.player.setVelocityX(250);
+					this.player.flipX = true;  
+			}
+		
+			if (Phaser.Input.Keyboard.JustDown(this.spacebar)){
+				this.playerShoot();
+			}
 		}
 		
-		if (Phaser.Input.Keyboard.JustDown(this.spacebar)){
-			this.playerShoot();
+		if(this.gameEnded)
+		{
+			if (Phaser.Input.Keyboard.JustDown(this.spacebar)){
+				this.scene.start("bootGame");
+			}			
 		}
-
 	}	
+	
+	startGame()
+	{
+		this.gameStarted = true;	
+		console.log("Game Started");
+		
+		this.createTimer();
+		
+		this.cursorKeys = this.input.keyboard.createCursorKeys();
+		this.spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+
+		this.player = this.physics.add.sprite(config.width/2 - 50, config.height - 80, "player-veh");
+		this.player.setCollideWorldBounds(true);		
+	}
+	
+	endGame()
+	{
+		this.endGameLabel = this.add.bitmapText(config.width / 2, config.height / 2, "pixelFont", "GAME OVER", 80);
+		this.endGameLabel.setOrigin(0.5,0.5);
+		this.spaceLabel = this.add.bitmapText(config.width / 2, config.height / 2 + 90, "pixelFont", "Press Space to Return", 70);
+		this.spaceLabel.setOrigin(0.5,0.5);
+
+
+		this.gameStarted = false;
+		this.gameEnded = true;
+		
+		this.player.destroy();
+		
+		this.incoming.children.iterate((missile) => {
+		if (!missile) return; 
+			missile.destroy();
+		});
+	}
 	
 	playerShoot()
 	{
@@ -155,6 +199,9 @@ class GameScene extends Phaser.Scene
 	// Creates a Missle at the top of the screen randomly in the width of a given type with a texture //
 	createIncomingMissileFromTop(type, texture)
 	{
+		if(!this.gameStarted)
+			return;
+		
 		if (this.incoming.children.entries.length >= this.getDifficultyLevel().maxIncoming) 
 			return;
 	
@@ -204,9 +251,9 @@ class GameScene extends Phaser.Scene
 	{
 		this.worldHealth -= amount;
 		this.healthNumberLabel.text = this.worldHealth, 6;
-		if (this.worldHealth <= 0) 
+		if (this.worldHealth <= 0 && !this.gameEnded) 
 		{
-			// End Game Logic Start
+			this.endGame();
 		}
 	}
 	
