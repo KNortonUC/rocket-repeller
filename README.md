@@ -7,6 +7,9 @@ https://www.freepik.com/free-vector/military-missile-launcher-vector_40307733.ht
 <br>
 Explosion Sprite by ansimuz
 https://github.com/ansimuz/getting-started-with-phaser/tree/master
+<br>
+PixelFont by ansimuz
+https://github.com/ansimuz/getting-started-with-phaser/tree/master
 
 
 # Quick Setup Guide for Running the Express Server version (Leaderboard required step)
