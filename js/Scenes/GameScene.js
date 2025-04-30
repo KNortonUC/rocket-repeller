@@ -164,6 +164,8 @@ class GameScene extends Phaser.Scene
 		if (!missile) return; 
 			missile.destroy();
 		});
+		
+		this.submitScore();
 	}
 	
 	playerShoot()
@@ -309,6 +311,34 @@ class GameScene extends Phaser.Scene
 	getDifficultyLevel()
 	{
 		return difficultyMed;
+	}
+	
+	loadLeaderboard() {
+		fetch('/leaderboard')
+			.then(res => res.json())
+			.then(data => {
+			const list = document.getElementById('leaderboard');
+			list.innerHTML = '';
+			data.forEach(entry => {
+				const li = document.createElement('li');
+				li.textContent = `${entry.score}`;
+				list.appendChild(li);
+			});
+		});
+	}	
+		
+	
+	
+	submitScore() {
+		const score = parseInt(this.score);
+
+		fetch('/submit', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ score })
+		})
+		.then(() => this.loadLeaderboard())
+		.catch(err => console.error(err));
 	}
 	
 }
