@@ -28,6 +28,12 @@ class GameScene extends Phaser.Scene
 		
 		// Background
 		var gbg = this.add.image(config.width / 2, config.height / 2, 'background-scene');
+		this.nightOverlay = this.add.rectangle(0, 0, 924, 800, 0x000033)
+        .setOrigin(0)
+        .setAlpha(0) 
+        .setDepth(10);
+		
+		this.startDayNightCycle();
 		
 		// Scoring UI
 		this.score = 0;
@@ -107,10 +113,10 @@ class GameScene extends Phaser.Scene
 				this.player.setVelocity(0);
 				
 				if(this.cursorKeys.left.isDown){
-					this.player.setVelocityX(-250);
+					this.player.setVelocityX(-300);
 					this.player.flipX = false; 
 				}else if(this.cursorKeys.right.isDown){
-					this.player.setVelocityX(250);
+					this.player.setVelocityX(300);
 					this.player.flipX = true;  
 			}
 		
@@ -184,7 +190,7 @@ class GameScene extends Phaser.Scene
 		
 		// Shoot cooldown
 		this.time.addEvent({
-			delay: 800,
+			delay: 600,
 			callback: this.resetShootability,
 			callbackScope: this,
 			loop: false
@@ -246,6 +252,27 @@ class GameScene extends Phaser.Scene
 		this.popScore(50);
 	}
 	
+    startDayNightCycle() {
+        this.time.addEvent({
+            delay: 180000, 
+            loop: true,
+            callback: () => this.animateDayNight()
+        });
+
+        this.animateDayNight(); 
+    }
+
+    animateDayNight() {
+        this.tweens.add({
+            targets: this.nightOverlay,
+            alpha: 0.5,
+            duration: 90000, 
+            ease: 'Sine.easeInOut',
+            yoyo: true,     
+            hold: 0,        
+        });
+    }	
+	
 	
 	worldDamage(amount)
 	{
@@ -281,7 +308,7 @@ class GameScene extends Phaser.Scene
 	
 	getDifficultyLevel()
 	{
-		return difficultyEasy;
+		return difficultyMed;
 	}
 	
 }
